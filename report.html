@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거래처별 매출 분석 보고서</title>
+    <!-- Tailwind CSS 로딩 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js (그래프 라이브러리) 로딩 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Pretendard 폰트 로딩 -->
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc; /* 밝은 회색 배경 */
+        }
+        .chart-container {
+            position: relative;
+            height: 350px; /* 차트 높이 고정 */
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-lg">
+        <!-- 보고서 헤더 -->
+        <header class="text-center border-b pb-6 mb-10">
+            <h1 class="text-4xl font-bold text-gray-800">거래처별 데이터 분석 보고서</h1>
+            <p class="text-md text-gray-500 mt-3">분석 기간: 2025년 1월 ~ 2025년 4월</p>
+        </header>
+
+        <main>
+            <!-- 1. 분석 개요 -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold text-gray-700 border-l-4 border-blue-600 pl-4 mb-5">1. 분석 개요</h2>
+                <p class="text-gray-600 leading-relaxed bg-gray-50 p-6 rounded-lg">
+                    본 보고서는 2025년 1월부터 4월까지 발생한 거래 데이터를 기반으로, 거래처별 매출 및 매입 현황을 다각적으로 분석합니다.
+                    종합 현황, 우수 거래처 순위, 월별 거래 추이 등을 시각화하여 비즈니스 현황에 대한 깊이 있는 인사이트를 제공하고,
+                    데이터에 기반한 향후 운영 전략을 수립하는 데 기여하는 것을 목적으로 합니다.
+                </p>
+            </section>
+
+            <!-- 2. 종합 현황 -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold text-gray-700 border-l-4 border-blue-600 pl-4 mb-5">2. 종합 현황 (2025.01 ~ 2025.04)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="bg-blue-50 border border-blue-200 p-6 rounded-xl">
+                        <p class="text-lg text-blue-800">총 매출액</p>
+                        <p id="total-sales" class="text-3xl font-bold text-blue-900 mt-2">0 원</p>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 p-6 rounded-xl">
+                        <p class="text-lg text-green-800">총 매입액</p>
+                        <p id="total-purchases" class="text-3xl font-bold text-green-900 mt-2">0 원</p>
+                    </div>
+                    <div class="bg-gray-50 border border-gray-200 p-6 rounded-xl">
+                        <p class="text-lg text-gray-800">총 거래 건수</p>
+                        <p id="total-transactions" class="text-3xl font-bold text-gray-900 mt-2">0 건</p>
+                    </div>
+                    <div class="bg-gray-50 border border-gray-200 p-6 rounded-xl">
+                        <p class="text-lg text-gray-800">총 거래처 수</p>
+                        <p id="unique-accounts" class="text-3xl font-bold text-gray-900 mt-2">0 곳</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 3. 우수 거래처 분석 -->
+            <section class="mb-12">
+                 <h2 class="text-2xl font-semibold text-gray-700 border-l-4 border-blue-600 pl-4 mb-5">3. 우수 거래처 분석</h2>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <!-- 총 거래액 기준 TOP 5 -->
+                     <div class="bg-gray-50 p-6 rounded-xl">
+                         <h3 class="text-xl font-semibold text-gray-800 mb-4">🏆 총 거래액 기준 TOP 5</h3>
+                         <div class="chart-container">
+                             <canvas id="topOverallChart"></canvas>
+                         </div>
+                     </div>
+                     <!-- 총 매출액 기준 TOP 5 -->
+                     <div class="bg-gray-50 p-6 rounded-xl">
+                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 총 매출액 기준 TOP 5</h3>
+                         <div class="chart-container">
+                             <canvas id="topSalesChart"></canvas>
+                         </div>
+                     </div>
+                 </div>
+            </section>
+
+            <!-- 4. 월별 거래 동향 -->
+            <section class="mb-12">
+                <h2 class="text-2xl font-semibold text-gray-700 border-l-4 border-blue-600 pl-4 mb-5">4. 월별 거래 동향</h2>
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="chart-container !h-[400px]">
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 5. 결론 및 제언 -->
+            <section>
+                <h2 class="text-2xl font-semibold text-gray-700 border-l-4 border-blue-600 pl-4 mb-5">5. 결론 및 제언</h2>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-8 rounded-r-lg space-y-4 text-gray-700">
+                    <p>
+                        <strong>분석 결과, '삼정유통'과 '동서상사'가 총 거래액과 매출 부문에서 비즈니스의 핵심적인 역할을 하고 있음</strong>이 확인되었습니다. 이들 핵심 거래처와의 관계를 더욱 공고히 하고, 맞춤형 혜택이나 장기 계약을 통해 안정적인 매출 기반을 강화하는 전략이 필요합니다.
+                    </p>
+                     <p>
+                        월별 동향을 살펴보면, <strong>1월에 가장 높은 매출과 매입을 기록한 후 점차 감소하는 추세</strong>를 보입니다. 특히 4월의 거래액 감소가 눈에 띕니다. 연초에 집중된 거래 패턴의 원인을 파악하고, 비수기인 2~4월 기간 동안 매출을 활성화할 수 있는 프로모션이나 신규 거래처 발굴 등의 노력이 중요해 보입니다.
+                    </p>
+                    <p>
+                        결론적으로, <strong>핵심 거래처에 대한 집중 관리</strong>와 더불어 <strong>분기별 안정적인 매출 흐름을 만들기 위한 전략</strong>을 병행하는 것이 향후 비즈니스 성장에 중요한 과제가 될 것입니다.
+                    </p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Python 백엔드에서 분석한 데이터를 여기에 삽입합니다.
+        const reportData = {
+            "summary": {
+                "total_sales": 2235921,
+                "total_purchases": 8142063,
+                "total_transactions": 100,
+                "unique_accounts": 10
+            },
+            "charts": {
+                "top_overall_accounts": {
+                    "labels": ["삼정유통", "동서상사", "더블유상회", "한빛상사", "그린푸드"],
+                    "data": [2012723, 1928373, 1754603, 1686411, 1502446]
+                },
+                "top_sales_accounts": {
+                    "labels": ["삼정유통", "동서상사", "한빛상사", "에코마트", "그린푸드"],
+                    "data": [821987, 680822, 252998, 240401, 126040]
+                },
+                "monthly_trends": {
+                    "labels": ["2025-01", "2025-02", "2025-03", "2025-04"],
+                    "sales_data": [1162486, 617631, 424831, 30973],
+                    "purchases_data": [2723337, 2378952, 2329610, 710164]
+                }
+            }
+        };
+
+        // 숫자 포맷팅 함수 (예: 1234567 -> 1,234,567)
+        const formatNumber = (num) => num.toLocaleString('ko-KR');
+
+        // --- 1. 종합 현황 데이터 바인딩 ---
+        document.getElementById('total-sales').textContent = `${formatNumber(reportData.summary.total_sales)} 원`;
+        document.getElementById('total-purchases').textContent = `${formatNumber(reportData.summary.total_purchases)} 원`;
+        document.getElementById('total-transactions').textContent = `${formatNumber(reportData.summary.total_transactions)} 건`;
+        document.getElementById('unique-accounts').textContent = `${formatNumber(reportData.summary.unique_accounts)} 곳`;
+
+        // --- 2. 차트 생성 ---
+        const CHART_TOOLTIP_CONFIG = {
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) label += ': ';
+                    if (context.parsed.x !== null) {
+                        label += `${formatNumber(context.parsed.x)} 원`;
+                    }
+                    return label;
+                }
+            }
+        };
+
+        const CHART_LAYOUT_CONFIG = {
+             padding: { top: 10, bottom: 10, left: 10, right: 10 }
+        };
+        
+        // 차트 1: 총 거래액 기준 TOP 5
+        new Chart(document.getElementById('topOverallChart'), {
+            type: 'bar',
+            data: {
+                labels: reportData.charts.top_overall_accounts.labels,
+                datasets: [{
+                    label: '총 거래액',
+                    data: reportData.charts.top_overall_accounts.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', // 가로 막대 차트
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP_CONFIG },
+                layout: CHART_LAYOUT_CONFIG
+            }
+        });
+        
+        // 차트 2: 총 매출액 기준 TOP 5
+        new Chart(document.getElementById('topSalesChart'), {
+            type: 'bar',
+            data: {
+                labels: reportData.charts.top_sales_accounts.labels,
+                datasets: [{
+                    label: '총 매출액',
+                    data: reportData.charts.top_sales_accounts.data,
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: CHART_TOOLTIP_CONFIG },
+                layout: CHART_LAYOUT_CONFIG
+            }
+        });
+
+        // 차트 3: 월별 거래 동향
+        new Chart(document.getElementById('monthlyTrendChart'), {
+            type: 'line',
+            data: {
+                labels: reportData.charts.monthly_trends.labels,
+                datasets: [
+                    {
+                        label: '월별 매출',
+                        data: reportData.charts.monthly_trends.sales_data,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '월별 매입',
+                        data: reportData.charts.monthly_trends.purchases_data,
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += `${formatNumber(context.parsed.y)} 원`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                           callback: function(value) { return `${formatNumber(value/10000)}만`; }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
